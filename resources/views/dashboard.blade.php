@@ -18,4 +18,20 @@
             </div>
         </div>
     </div>
+
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-6">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <h3 class="font-semibold text-lg text-gray-800 dark:text-gray-200">
+                        {{ __('Taken per status') }}
+                    </h3>
+                    <ul class="mt-4">
+                        <li>Todo: {{ $todoCount }}</li>
+                        <li>In Progress: {{ $inProgressCount }}</li>
+                        <li>Done: {{ $doneCount }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

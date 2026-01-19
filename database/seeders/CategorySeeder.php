@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Category; // Add this import
+use App\Models\Category;
 
 class CategorySeeder extends Seeder
 {
@@ -13,10 +12,18 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::create(['name' => 'School']);
-        Category::create(['name' => 'Werk']);
-        Category::create(['name' => 'Persoonlijk']);
-        Category::create(['name' => 'Gym']);
-        Category::create(['name' => 'Chillen']);
+        $categories = [
+            'School',
+            'Werk',
+            'Persoonlijk',
+            'Gym',
+            'Chillen',
+        ];
+
+        foreach ($categories as $categoryName) {
+            if (!Category::where('name', $categoryName)->exists()) {
+                Category::create(['name' => $categoryName]);
+            }
+        }
     }
 }

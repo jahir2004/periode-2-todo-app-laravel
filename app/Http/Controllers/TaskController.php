@@ -10,22 +10,21 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // filepath: app/Http/Controllers/TaskController.php
+    
+    public function index(Request $request)
     {
-        //all caetegorieen ophalen
-        $categories = Category::all();
+        $categoryId = $request->get('category');
+        $tasks = Task::where('user_id', auth()->id()); // Haal alleen taken van de ingelogde gebruiker op
 
-        //basis query voor ingelogde gebruiker
-        $tasks = auth()->user()->tasks()->getQuery();
-        $request = request();
-        // filter als er een category is gekozen
-        if ($request->filled('category')) {
-            $tasks->where('category_id', $request->category); 
-            }
-        // voer de query uit
-        $tasks = $tasks->get();
-        // stuur de taken en categorien naar de view
-       return view('tasks.index', compact('tasks', 'categories'));
+        if ($categoryId) {
+            $tasks->where('category_id', $categoryId);
+        }
+
+        return view('tasks.index', [
+            'tasks' => $tasks->get(),
+            'categories' => Category::all(),
+        ]);
     }
 
     /**
@@ -33,7 +32,8 @@ class TaskController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('tasks.create', compact('categories'));
     }
 
     /**
@@ -41,7 +41,18 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'category_id' => 'required',
+            'status' => 'required',
+        ]);
+
+        auth()->user()->tasks()->create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'status' => $request->status,
+        ]);
     }
 
     /**
@@ -71,8 +82,21 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Task $task)
     {
-        //
+        $task->delete(); //soft delete
+        return redirect()->back()->with('success', 'Taak verwijderd!');
+    }
+
+    public function trash()
+    {
+        $tasks = Task::onlyTrashed()->where('user_id', auth()->id())->get(); // Haal alleen soft-deleted taken op
+        return view('tasks.trash', compact('tasks'));
+    }
+
+    public function restore($id)
+    {
+        Task::withTrashed()->find($id)->restore();
+        return redirect()->route('tasks.trash')->with('success', 'Taak hersteld!');
     }
 }

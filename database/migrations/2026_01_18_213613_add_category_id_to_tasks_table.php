@@ -9,12 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('tasks', function (Blueprint $table) {
-            $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete();
-        });
-    }
+    public function up()
+{
+    Schema::table('tasks', function (Blueprint $table) {
+        if (!Schema::hasColumn('tasks', 'category_id')) {
+            $table->integer('category_id')->nullable();
+        }
+    });
+}
 
     /**
      * Reverse the migrations.
