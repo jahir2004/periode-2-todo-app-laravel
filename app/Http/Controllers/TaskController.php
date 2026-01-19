@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Task;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -11,8 +12,20 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = auth()->user()->tasks;
-        return view('tasks.index', compact('tasks'));
+        //all caetegorieen ophalen
+        $categories = Category::all();
+
+        //basis query voor ingelogde gebruiker
+        $tasks = auth()->user()->tasks()->getQuery();
+        $request = request();
+        // filter als er een category is gekozen
+        if ($request->filled('category')) {
+            $tasks->where('category_id', $request->category); 
+            }
+        // voer de query uit
+        $tasks = $tasks->get();
+        // stuur de taken en categorien naar de view
+       return view('tasks.index', compact('tasks', 'categories'));
     }
 
     /**
