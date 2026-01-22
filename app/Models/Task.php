@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Task extends Model
 {
 
-    protected $fillable = ['title', 'description', 'category_id', 'user_id'];
+    protected $fillable = ['title', 'description',  'status', 'category_id', 'user_id'];
     
     public function user()
     {

@@ -12,18 +12,19 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = [
-            'School',
-            'Werk',
-            'Persoonlijk',
-            'Gym',
-            'Chillen',
-        ];
+        Category::create([
+            'name' => 'Algemeen',
+            'description' => 'Standaard categorie',
+        ]);
 
-        foreach ($categories as $categoryName) {
-            if (!Category::where('name', $categoryName)->exists()) {
-                Category::create(['name' => $categoryName]);
-            }
-        }
+        Category::create([
+            'name' => 'Werk',
+            'description' => 'Categorie voor werkgerelateerde taken',
+        ]);
+
+        Category::create([
+            'name' => 'Persoonlijk',
+            'description' => 'Categorie voor persoonlijke taken',
+        ]);
     }
 }

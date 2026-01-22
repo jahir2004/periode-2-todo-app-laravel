@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('tasks.trash')" :active="request()->routeIs('tasks.trash')">
                         Prullenbak
                     </x-nav-link>
+                    <x-nav-link :href="url('/api-tasks')" :active="request()->is('api-tasks')">
+                        Complete API
+                    </x-nav-link>
                 </div>
             </div>
 

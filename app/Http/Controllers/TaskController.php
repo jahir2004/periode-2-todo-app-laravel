@@ -15,7 +15,7 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $categoryId = $request->get('category');
-        $tasks = Task::where('user_id', auth()->id()); // Haal alleen taken van de ingelogde gebruiker op
+        $tasks = Task::query(); // Haal alle taken op
 
         if ($categoryId) {
             $tasks->where('category_id', $categoryId);
@@ -98,5 +98,10 @@ class TaskController extends Controller
     {
         Task::withTrashed()->find($id)->restore();
         return redirect()->route('tasks.trash')->with('success', 'Taak hersteld!');
+    }
+    public function completed()
+    {
+        $tasks = Task::where('status', 'done')->get();
+        return view('tasks.completed', ['tasks' => $tasks]);
     }
 }
