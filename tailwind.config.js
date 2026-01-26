@@ -18,5 +18,16 @@ export default {
         },
     },
 
+    theme: {
+        extend: {
+            colors: {
+                turquoise: {
+                    400: '#20b2aa',
+                    500: '#17a2b8',
+                },
+            },
+        },
+    },
+
     plugins: [forms],
 };

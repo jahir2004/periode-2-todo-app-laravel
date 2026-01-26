@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 mb-8 text-white shadow-xl">
+    <div class="bg-gradient-to-r from-blue-600 via-blue-500 to-turquoise-500 rounded-2xl p-6 mb-8 text-white shadow-xl">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold mb-2">Welkom terug, {{ Auth::user()->name }}! 👋</h1>

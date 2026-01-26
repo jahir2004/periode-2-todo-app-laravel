@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Category;
+use App\Models\Subtask;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -10,98 +11,132 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // filepath: app/Http/Controllers/TaskController.php
-    
     public function index(Request $request)
     {
-        $categoryId = $request->get('category');
-        $tasks = Task::query(); // Haal alle taken op
+        $query = Task::query()->where('user_id', auth()->id());
 
-        if ($categoryId) {
-            $tasks->where('category_id', $categoryId);
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
         }
 
-        return view('tasks.index', [
-            'tasks' => $tasks->get(),
-            'categories' => Category::all(),
-        ]);
+        $tasks = $query->get();
+        $categories = Category::all();
+
+        return view('tasks.index', compact('tasks', 'categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $categories = Category::all();
         return view('tasks.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required',
-            'category_id' => 'required',
-            'status' => 'required',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'status' => 'required|in:todo,in_progress,done',
         ]);
-
-        auth()->user()->tasks()->create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'status' => $request->status,
-        ]);
+    
+        $validated['user_id'] = auth()->id();
+        Task::create($validated);
+    
+        return redirect()->route('tasks.index')->with('success', 'Taak succesvol aangemaakt!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+         // Haal de taak op uit de database
+        $task = Task::findOrFail($id);
+
+        // Laad de subtaken
+        $task->load('subtasks');
+
+        // Geef de taak door aan de view
+        return view('tasks.show', compact('task'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function addSubtask(Request $request, Task $task)
     {
-        //
+        $request->validate(['title' => 'required|string|max:255']);
+        $task->subtasks()->create(['title' => $request->title]);
+        return redirect()->route('tasks.show', $task)->with('success', 'Subtask toegevoegd!');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function toggleSubtask(Subtask $subtask) 
     {
-        //
+        $subtask->update(['is_done' => !$subtask->is_done]);
+        return back()->with('success', 'Subtask bijgewerkt!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    public function edit(Task $task)
+    {
+        // Simpele check: is dit jouw taak?
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Dit is niet jouw taak');
+        }
+        
+        $categories = Category::all();
+        return view('tasks.edit', compact('task', 'categories'));
+    }
+
+    public function update(Request $request, Task $task)
+    {
+        // Simpele check: is dit jouw taak?
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Dit is niet jouw taak');
+        }
+    
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'status' => 'required|in:todo,in_progress,done',
+        ]);
+    
+        $task->update($validated);
+    
+        return redirect()->route('tasks.index')->with('success', 'Taak bijgewerkt!');
+    }
+
     public function destroy(Task $task)
     {
-        $task->delete(); //soft delete
+        // Simpele check: is dit jouw taak?
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Dit is niet jouw taak');
+        }
+        
+        $task->delete(); // soft delete
         return redirect()->back()->with('success', 'Taak verwijderd!');
     }
 
     public function trash()
     {
-        $tasks = Task::onlyTrashed()->where('user_id', auth()->id())->get(); // Haal alleen soft-deleted taken op
+        $tasks = Task::onlyTrashed()->where('user_id', auth()->id())->get();
         return view('tasks.trash', compact('tasks'));
     }
 
-    public function restore($id)
+    public function restore(Task $task)
     {
-        Task::withTrashed()->find($id)->restore();
+        // Simpele check: is dit jouw taak?
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Dit is niet jouw taak');
+        }
+        
+        $task->restore();
         return redirect()->route('tasks.trash')->with('success', 'Taak hersteld!');
     }
+
     public function completed()
     {
-        $tasks = Task::where('status', 'done')->get();
+        $tasks = Task::where('status', 'done')->where('user_id', auth()->id())->get();
         return view('tasks.completed', ['tasks' => $tasks]);
+    }
+
+    public function subtasks()
+    {
+        return $this->hasMany(Subtask::class);
     }
 }

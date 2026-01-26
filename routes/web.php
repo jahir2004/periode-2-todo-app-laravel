@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SubtaskController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,13 +18,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // Task routes
-    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/trash', [TaskController::class, 'trash'])->name('tasks.trash');
     Route::post('/tasks/restore/{id}', [TaskController::class, 'restore'])->name('tasks.restore');
-    Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
-    Route::get('/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
-    Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::get('/tasks/completed', [TaskController::class, 'completed'])->name('tasks.completed');
+    Route::resource('tasks', TaskController::class);
+
+    // Subtask routes
+    Route::post('/tasks/{task}/subtasks', [TaskController::class, 'addSubtask'])->name('subtasks.store');
+    Route::patch('/subtasks/{subtask}/toggle', [TaskController::class, 'toggleSubtask'])->name('subtasks.toggle');
+    Route::get('/subtasks/{subtask}', [SubtaskController::class, 'show'])->name('subtasks.show');
 });
 
 

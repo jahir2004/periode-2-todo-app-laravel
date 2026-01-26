@@ -1,4 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.sidebar')
+
+@section('header', 'Mijn taken')
 
 @section('content')
     <h1>Voltooide Taken</h1>

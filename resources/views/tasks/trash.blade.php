@@ -1,29 +1,22 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold">Prullenbak</h2>
-    </x-slot>
+@extends('layouts.sidebar')
 
-    <div class="p-6">
-        <h1 class="text-2xl font-bold mb-6">Verwijderde Taken</h1>
+@section('header', 'Prullenbak')
 
-        @if ($tasks->count())
-            @foreach ($tasks as $task)
-                <div class="mb-4 p-4 bg-white shadow rounded">
-                    <h3 class="font-bold">{{ $task->title }}</h3>
-                    <p>{{ $task->description }}</p>
-                    <p class="text-sm text-gray-500">Verwijderd op: {{ $task->deleted_at->format('d-m-Y H:i') }}</p>
+@section('content')
+    <h2 class="text-xl font-bold mb-4">Prullenbak</h2>
 
-                    {{-- Herstelknop --}}
-                    <form action="{{ route('tasks.restore', $task->id) }}" method="POST" class="mt-2">
-                        @csrf
-                        <button type="submit" class="text-green-500 hover:underline">Herstellen</button>
-                    </form>
-                </div>
-            @endforeach
-        @else
-            <div class="p-4 bg-gray-100 rounded">
-                <p class="text-gray-700">Geen verwijderde taken gevonden.</p>
+    @if($tasks->count())
+        @foreach($tasks as $task)
+            <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded shadow">
+                <div class="font-semibold">{{ $task->title }}</div>
+                <div class="text-gray-500">{{ $task->description }}</div>
+                <form action="{{ route('tasks.restore', $task->id) }}" method="POST" class="inline">
+                    @csrf
+                    <button class="text-green-600 underline ml-2" type="submit">Herstellen</button>
+                </form>
             </div>
-        @endif
-    </div>
-</x-app-layout>
+        @endforeach
+    @else
+        <p class="text-gray-500">Geen verwijderde taken.</p>
+    @endif
+@endsection
