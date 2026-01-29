@@ -97,9 +97,47 @@
                         <span x-show="sidebarOpen" x-cloak class="font-medium">Prullenbak</span>
                     </a>
                     
+                    <!-- Notifications -->
+                    <a href="{{ route('notifications.index') }}" 
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative
+                              {{ request()->routeIs('notifications.*') 
+                                 ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400' 
+                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5zm0 0V3M9 3H4l5-5 5 5H9z"></path>
+                        </svg>
+                        <span x-show="sidebarOpen" x-cloak class="font-medium flex items-center gap-2">
+                            📬 Notificaties
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <span class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                                    {{ auth()->user()->unreadNotifications->count() }}
+                                </span>
+                            @endif
+                        </span>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span x-show="!sidebarOpen" x-cloak class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                            {{ auth()->user()->unreadNotifications->count() }}
+                        </span>
+                        @endif
+                    </a>
+                    
                     <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                         <p x-show="sidebarOpen" x-cloak class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Account</p>
                     </div>
+                    
+                    @if(app()->environment('local'))
+                    <!-- Test Notifications (only in development) -->
+                    <a href="{{ route('test.notifications.page') }}" 
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                              {{ request()->routeIs('test.notifications.page') 
+                                 ? 'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400' 
+                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM15 17H9a6 6 0 1 1 0-12h6m0 0v5.5M21 3L9 15"></path>
+                        </svg>
+                        <span x-show="sidebarOpen" x-cloak class="font-medium">🧪 Test Notificaties</span>
+                    </a>
+                    @endif
                     
                     <!-- Profile -->
                     <a href="{{ route('profile.edit') }}" 

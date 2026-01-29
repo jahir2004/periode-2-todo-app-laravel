@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Subtask;
+use App\Models\User;
+use App\Notifications\TaskCreated;
+use App\Notifications\NewTaskForAdmin;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -41,9 +44,19 @@ class TaskController extends Controller
         ]);
     
         $validated['user_id'] = auth()->id();
-        Task::create($validated);
+        $task = Task::create($validated);
+        $user = auth()->user();
+        
+        // Verstuur notificatie naar de gebruiker
+        $user->notify(new TaskCreated($task));
+        
+        // Verstuur notificatie naar alle admins (gebruikers met email admin@example.com)
+        $admins = User::where('email', 'admin@example.com')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new NewTaskForAdmin($task, $user));
+        }
     
-        return redirect()->route('tasks.index')->with('success', 'Taak succesvol aangemaakt!');
+        return redirect()->route('tasks.index')->with('success', 'Taak succesvol aangemaakt! Je ontvangt een bevestigingsmail.');
     }
 
     public function show(string $id)
